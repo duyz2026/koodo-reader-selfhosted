@@ -1,0 +1,33 @@
+services:
+  koodo:
+    image: "${KOODO_IMAGE_TAG:-ghcr.io/koodo-reader/koodo-reader:master}"
+    restart: unless-stopped
+    environment:
+      - ENABLE_HTTP_SERVER=true
+      - SERVER_USERNAME=${SERVER_USERNAME:-admin}
+      - SERVER_PASSWORD=${SERVER_PASSWORD:?请在 .env 设置 SERVER_PASSWORD}
+    volumes:
+      - "${DATA_PATH:-/srv/koodo/uploads}:/app/uploads"
+    networks:
+      - sync
+    expose:
+      - "80"
+      - "8080"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    volumes:
+      - ./reverse-proxy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./reverse-proxy/certs:/etc/caddy/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - sync
+
+networks:
+  sync:
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,21 @@
+# 环境配置（含密码，绝不入库）
+.env
+.env.example.bak
+
+# 运行数据与备份
+data/
+backups/
+*.log
+
+# 生成的证书与 Caddyfile（install.sh 产出，含主机名）
+reverse-proxy/Caddyfile
+reverse-proxy/certs/
+
+# 系统
+.DS_Store
+*.swp
+
+# 注意：koodo-image.lock 与 VERSION 是冻结契约，必须入库
+
+# 本地智能体记忆，不入库
+.workbuddy/

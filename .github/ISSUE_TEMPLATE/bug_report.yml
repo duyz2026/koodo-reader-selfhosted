@@ -1,0 +1,40 @@
+name: Bug report
+description: 部署或运行中的问题反馈
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: input
+    id: os
+    attributes:
+      label: 操作系统
+      description: 服务器系统版本（如 Ubuntu 22.04 / Debian 12）
+    validations:
+      required: true
+  - type: dropdown
+    id: tls
+    attributes:
+      label: TLS 模式
+      options:
+        - 域名 + Let's Encrypt
+        - 自签证书（公网 IP）
+        - 纯 HTTP（内网）
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: koodo-sync-hub 版本
+      description: git tag 或 commit，如 v0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 复现步骤与现象
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志
+      description: docker compose logs / koodo-hub status 输出（脱敏）

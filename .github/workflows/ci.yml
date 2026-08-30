@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install linters
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck yamllint
+          # hadolint
+          curl -sL https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64 \
+            -o /usr/local/bin/hadolint
+          chmod +x /usr/local/bin/hadolint
+
+      - name: shellcheck
+        run: |
+          for f in install.sh koodo-hub; do
+            [ -f "$f" ] && shellcheck "$f"
+          done
+
+      - name: yamllint
+        run: |
+          yamllint -d "{extends: default, ignore: .github}" \
+            docker-compose.yml docker-compose.http.yml docker-compose.tls.yml .github/workflows/ci.yml
+
+      - name: verify freeze lock consistency
+        run: |
+          if [ -f koodo-image.lock ] && [ -f docker-compose.yml ]; then
+            digest=$(grep KOODO_DIGEST koodo-image.lock | cut -d= -f2)
+            grep -q "@$digest" docker-compose.yml || \
+              { echo "koodo-image.lock 与 docker-compose.yml digest 不一致"; exit 1; }
+          fi

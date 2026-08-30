@@ -1,0 +1,21 @@
+# koodo-sync-hub 内部版本与冻结状态
+# 本文件随仓库分发，本地开发机与生产服务器应保持同一 tag 下的同一内容
+
+VERSION=1.0.0
+RELEASE_DATE=2026-08-31
+FREEZE=1
+
+# 已冻结的 Koodo 镜像（不可变 digest，非可移动 tag）
+KOODO_IMAGE=ghcr.io/koodo-reader/koodo-reader
+KOODO_IMAGE_DIGEST=sha256:6db5e92fe24dd200674aefe33b0c3d20409eebfe33c14a2b0418aedc7fc01c7d
+
+# 生产验证环境
+DEPLOY_STATUS=production-verified
+DEPLOY_HOST=ibm-t460-dyz
+DEPLOY_TAILSCALE_IP=100.86.58.36
+DEPLOY_TLS_MODE=3
+DEPLOY_HTTP_PORT=8090
+DEPLOY_DS_PORT=8091
+
+# git 信息（GitHub 建仓并打 tag 后补全）
+GIT_COMMIT=待建仓后填入

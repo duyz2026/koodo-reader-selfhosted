@@ -1,0 +1,36 @@
+# koodo-sync-hub Caddyfile 模板
+# 实际文件由 install.sh 生成（含具体主机名/证书），已 gitignore。
+#
+# 三种模式示例：
+
+# 模式 1：域名 + Let's Encrypt（自动申请）
+# your.domain.example {
+#   tls you@example.com
+#   encode gzip
+#   handle_path /datasource/* {
+#     uri strip_prefix /datasource
+#     reverse_proxy koodo:8080
+#   }
+#   reverse_proxy koodo:80
+# }
+
+# 模式 2：自签证书（公网 IP）
+# 1.2.3.4 {
+#   tls /etc/caddy/certs/fullchain.pem /etc/caddy/certs/privkey.pem
+#   encode gzip
+#   handle_path /datasource/* {
+#     uri strip_prefix /datasource
+#     reverse_proxy koodo:8080
+#   }
+#   reverse_proxy koodo:80
+# }
+
+# 模式 3：纯 HTTP（仅内网）
+# 1.2.3.4:80 {
+#   encode gzip
+#   handle_path /datasource/* {
+#     uri strip_prefix /datasource
+#     reverse_proxy koodo:8080
+#   }
+#   reverse_proxy koodo:80
+# }

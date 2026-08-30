@@ -1,0 +1,7 @@
+# HTTP-only 模式（TLS 模式 3）使用：只绑定 HTTP 端口，避免与 80/443 已有服务冲突
+# 端口职责：HTTP_PORT -> 网页版(容器80)；DS_PORT -> 数据源(容器同端口)
+services:
+  caddy:
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${DS_PORT:-8091}:${DS_PORT:-8091}"

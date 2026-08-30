@@ -1,0 +1,20 @@
+koodo-sync-hub
+================
+
+本仓库是一套围绕 Koodo Reader 官方 Docker 镜像的「部署与运维工具集」，
+不包含对 Koodo Reader 自身源代码的修改或再分发。
+
+本仓库自身以 MIT 许可证发布（见 LICENSE）。
+
+上游项目署名（依据 Koodo Reader 的 AGPL-3.0 许可要求）：
+
+  Koodo Reader
+  许可证：AGPL-3.0
+  上游仓库：https://github.com/koodo-reader/koodo-reader
+  官网：     https://www.koodoreader.com/
+
+本工具通过 `docker pull ghcr.io/koodo-reader/koodo-reader` 引用上游官方镜像，
+尊重其许可与署名要求。若未来对本仓库之外的 Koodo Reader 源码进行修改或再分发，
+须遵循 AGPL-3.0，且应在独立仓库中开源。
+
+Koodo Reader 官方不提供商用授权，使用者应自行承担相关合规责任。

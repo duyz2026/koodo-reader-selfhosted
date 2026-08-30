@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 510" width="680" height="510" role="img">
+<title>koodo-sync-hub 版本冻结双锁机制</title>
+<desc>应用层锁镜像 digest，工具层锁 git tag，通过 sync 命令让本地与服务器保持同一冻结态</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+<rect x="0" y="0" width="680" height="510" fill="#FFFFFF"/>
+
+<rect x="40" y="60" width="290" height="140" rx="12" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="185" y="88" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="14" font-weight="500" fill="#085041" text-anchor="middle" dominant-baseline="central">应用层：镜像锁</text>
+<text x="185" y="118" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#0F6E56" text-anchor="middle" dominant-baseline="central">KOODO_IMAGE_TAG=</text>
+<text x="185" y="140" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#0F6E56" text-anchor="middle" dominant-baseline="central">ghcr.io/...@sha256:6db5e9...</text>
+<text x="185" y="172" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle" dominant-baseline="central">锁定不可变 digest</text>
+
+<rect x="350" y="60" width="290" height="140" rx="12" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="495" y="88" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="14" font-weight="500" fill="#3C3489" text-anchor="middle" dominant-baseline="central">工具层：代码锁</text>
+<text x="495" y="118" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#534AB7" text-anchor="middle" dominant-baseline="central">koodo-image.lock</text>
+<text x="495" y="140" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#534AB7" text-anchor="middle" dominant-baseline="central">VERSION + git tag</text>
+<text x="495" y="172" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle" dominant-baseline="central">锁文件随仓库分发</text>
+
+<path d="M185 200 L185 218 L340 218 L340 231" fill="none" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M495 200 L495 218" fill="none" stroke="#888780" stroke-width="1.5"/>
+
+<rect x="240" y="235" width="200" height="48" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="340" y="259" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="13" font-weight="500" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">koodo-hub sync --to tag</text>
+
+<path d="M340 283 L340 306" fill="none" stroke="#888780" stroke-width="1.5"/>
+<path d="M225 306 L455 306" fill="none" stroke="#B4B2A9" stroke-width="0.5"/>
+<path d="M225 306 L225 326" fill="none" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<path d="M455 306 L455 326" fill="none" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<rect x="140" y="330" width="170" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="225" y="352" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="14" font-weight="500" fill="#0C447C" text-anchor="middle" dominant-baseline="central">本地 X1</text>
+<text x="225" y="370" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#185FA5" text-anchor="middle" dominant-baseline="central">开发机</text>
+
+<rect x="370" y="330" width="170" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="455" y="352" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="14" font-weight="500" fill="#0C447C" text-anchor="middle" dominant-baseline="central">服务器 T460p</text>
+<text x="455" y="370" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#185FA5" text-anchor="middle" dominant-baseline="central">生产环境</text>
+
+<text x="340" y="358" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="18" font-weight="500" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">=</text>
+
+<text x="340" y="424" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle">两端 checkout 同一 tag，锁文件随仓库分发，天然同态</text>
+<text x="340" y="446" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle">冻结态下 upgrade 被禁用，需先 release 再升级</text>
+<text x="340" y="468" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle">升级前强制备份，确保随时可回滚</text>
+</svg>

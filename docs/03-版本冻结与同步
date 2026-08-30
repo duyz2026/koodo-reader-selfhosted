@@ -1,0 +1,121 @@
+# 版本冻结与同步策略 — 定稿即固化，本机与服务器同态
+
+> 版本：v0.1（草案） 日期：2026-08-29
+> 上游文档：`01-需求与总体框架.md`、`02-开源化与GitHub项目规划.md`
+> 对应诉求："代码版本一旦固定，在本地电脑和服务器上同时同步并冻结固化版本"
+
+---
+
+## 1. 背景与目标
+
+前文设计了"可升级"能力（`upgrade.sh` 跟新上游）。本需求补上对称的"可冻结"能力：
+
+- **冻结（freeze）**：一旦把某个代码版本定为"生产基线"，它就**不可漂移**——Koodo 应用镜像锁到具体 digest，部署工具代码锁到具体 git tag/commit。
+- **同态同步**：本地开发电脑和服务器必须运行**完全一致**的冻结版本，杜绝"我本地是新的、服务器是旧的"这种隐性分叉。
+- **固化**：冻结态写进可提交的锁文件，纳入 git，任何一台机器拉下来都得到同一结果。
+
+> 与"升级"不冲突：升级=主动解冻再推进；冻结=停止推进。两者共存，由 `FREEZE` 开关和锁文件控制。
+
+## 2. 两层版本模型
+
+| 层 | 是什么 | 漂移风险 | 冻结手段 |
+|----|--------|----------|----------|
+| **工具层**（本仓库） | install.sh / upgrade.sh / compose / docs / cli | 本地改了没推、服务器没拉 | git tag（语义化）+ 双方 checkout 同一 tag |
+| **应用层**（Koodo 镜像） | `ghcr.io/koodo-reader/koodo-reader` | `:master` 浮动 tag 随时变 | 锁到 `registry@sha256:...` 不可变 digest |
+
+要点：**镜像必须锁 digest，不能锁 `:master`/`vX` 这类可移动 tag**，否则上游重推同名 tag 就会偷偷变版本，冻结形同虚设。
+
+## 3. 冻结机制设计
+
+### 3.1 锁文件（核心，纳入 git）
+
+仓库根增加两个文件，**都提交进 git**，是本地与服务器"同态"的契约：
+
+- `koodo-image.lock`（应用层锁）
+  ```
+  KOODO_IMAGE=ghcr.io/koodo-reader/koodo-reader
+  KOODO_DIGEST=sha256:ab12...（冻结时写入的真实摘要）
+  KOODO_TAG=v1.x.x            # 人类可读备注，仅展示
+  FROZEN_AT=2026-08-29
+  ```
+- `VERSION`（工具层锁，由 `git describe` 或 tag 生成）
+  ```
+  KOODO_SYNC_HUB=v0.2.0
+  COMMIT=9f3c1a2
+  ```
+
+`docker-compose.yml` 引用锁文件：
+```yaml
+services:
+  koodo:
+    image: "${KOODO_IMAGE}@${KOODO_DIGEST}"   # 永远按 digest 拉取
+```
+
+### 3.2 运行开关
+
+`.env` 增加一行（提交 `.env.example`，不提交 `.env`）：
+```
+FREEZE=1          # 1=冻结态, 0/缺省=可升级态
+```
+
+- `FREEZE=1` 时，`upgrade.sh` **拒绝**任何 `pull`/重建，仅允许 `status` 查看并提示"当前为冻结态"；强行升级需先 `freeze --release` 或手动置 0。
+- `FREEZE=0` 时，`upgrade.sh` 走原"跟新"流程（拉最新稳定镜像 + 备份 + 重建）。
+
+### 3.3 命令接口（`koodo-hub` 扩展）
+
+| 命令 | 作用 |
+|------|------|
+| `koodo-hub freeze` | 读取当前运行中的镜像 digest，写 `koodo-image.lock` + 置 `FREEZE=1` + 打 git tag + 提示提交 |
+| `koodo-hub freeze --to <tag>` | 显式冻结到指定 Koodo tag 的 digest |
+| `koodo-hub status` | 显示工具层 VERSION + 应用层 digest + 冻结态 + 本地/远端是否有新 tag（冻结态下高亮"FROZEN"） |
+| `koodo-hub sync` | 在本地/服务器执行 `git fetch --tags && git checkout <VERSION 中的 tag>`，保证两台机器同态 |
+| `koodo-hub release` | 解冻：`FREEZE=0`（**不**自动升级），交出主动升级权 |
+
+## 4. 本地 + 服务器同态同步冻结流程
+
+定稿一次，两台机器拿到一致结果的推荐 SOP（与 git 同源，无需额外同步通道）：
+
+```
+[本地电脑]
+1. 完成工具代码修改，本地 `git tag v0.2.0` 并 `git push --tags`
+2. 服务器上已运行旧版本，`koodo-hub freeze`（或 `--to <tag>）`
+   → 写 koodo-image.lock（digest）+ 置 FREEZE=1
+3. git commit 锁文件并 push
+
+[服务器]
+4. `koodo-hub sync --to v0.2.0`
+   → git fetch --tags && git checkout v0.2.0（含 koodo-image.lock）
+   → 载入 .env（FREEZE=1）+ compose 按 digest 拉取重建
+   → 健康检查通过后冻结固化完成
+
+[本地电脑 / 任意协作者]
+5. 同样 `koodo-hub sync --to v0.2.0` → 本机与服务器版本 100% 一致
+```
+
+> 因为锁文件和 tag 都在 git 里，"同步"就是 `git checkout 同一 tag`，天然保证本地=服务器。Koodo 阅读数据本身的跨端同步走另一套（数据源），与本版本冻结无关，互不干扰。
+
+## 5. 解锁与升级（回到"可升级"）
+
+1. `koodo-hub release` 解冻；
+2. `koodo-hub upgrade` 或 `upgrade.sh` 走备份→拉新→重建；
+3. 满意后再次 `koodo-hub freeze` 固化新一轮基线。
+
+做"升级"前**必须**先 `freeze` 旧基线并备份，确保可回滚——与 §8 升级机制一致。
+
+## 6. 风险与纪律
+
+| 风险 | 对策 |
+|------|------|
+| 冻结态长期不更新，漏掉安全补丁 | status 持续检查上游新 tag 并告警；规定"冻结不超过 N 个月需评估解冻" |
+| 有人本地绕过冻结直接改容器 | compose 强制 digest，本地改镜像不生效；CI 校验 lock 与 compose 一致 |
+| 本地/服务器 git 分叉 | `sync` 命令显式 checkout tag，禁止在游离态直接改；协作者统一走 PR+tag |
+| digest 写错导致拉不到镜像 | freeze 命令从实际运行容器读取真 digest，不手填 |
+
+## 7. 与路线图关系
+
+- 本能力归到 **v0.2 运维套件**（任务 #7）：`koodo-hub` 的 `freeze/sync/release` 与 `freeze` 开关同批交付。
+- `koodo-image.lock` + `VERSION` 作为 v0.2 的强制产物，CI 增加"锁文件与 compose digest 一致性"校验。
+
+---
+
+**待老板拍板**：① 冻结基线的默认周期（如"冻结后至多 3 个月评估一次升级"）；② 是否需要 README 里明示"生产环境建议默认冻结"；③ 协作者是否走 PR 流程（影响 sync 纪律）。

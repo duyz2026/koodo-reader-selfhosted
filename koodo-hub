@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# koodo-sync-hub 运维 CLI v0.1.1
+set -euo pipefail
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$DIR"
+
+need(){ command -v "$1" >/dev/null 2>&1 || { echo "缺少命令: $1" >&2; exit 1; }; }
+
+read_env(){
+  if [ -f .env ]; then
+    set -a; . ./.env; set +a
+  fi
+}
+
+set_dc(){
+  read_env
+  DC="docker compose ${COMPOSE_FILES:--f docker-compose.yml -f docker-compose.http.yml}"
+}
+
+set_env(){
+  local k="$1" v="$2" f=".env"
+  if [ -f "$f" ]; then
+    if grep -q "^${k}=" "$f"; then
+      sed -i.bak -E "s|^${k}=.*|${k}=${v}|" "$f" && rm -f "$f.bak"
+    else
+      printf '%s=%s\n' "$k" "$v" >> "$f"
+    fi
+  else
+    printf '%s=%s\n' "$k" "$v" > "$f"
+  fi
+}
+
+cmd_status(){
+  set_dc
+  need docker
+  echo "== koodo-sync-hub 状态 =="
+  echo "FREEZE : ${FREEZE:-0}"
+  echo "COMPOSE: ${COMPOSE_FILES:--f docker-compose.yml -f docker-compose.http.yml}"
+  $DC ps 2>/dev/null || true
+  local img
+  img="$($DC images koodo 2>/dev/null | awk 'NR==2{print $2}')" || true
+  echo "koodo 镜像: ${img:-未知}"
+  if [ "${FREEZE:-0}" = "1" ]; then
+    echo ">>> 冻结态：upgrade 已禁用（release 后可用）"
+  else
+    echo ">>> 可升级态"
+  fi
+}
+
+cmd_backup(){
+  read_env
+  local dest="${BACKUP_PATH:-./backups}"
+  mkdir -p "$dest"
+  local dp="${DATA_PATH:-/srv/koodo/uploads}"
+  local f="$dest/koodo-$(date +%Y%m%d-%H%M%S).tar.gz"
+  tar -czf "$f" -C "$(dirname "$dp")" "$(basename "$dp")"
+  [ -f .env ] && tar -rzf "$f" -C "$DIR" .env 2>/dev/null || true
+  echo "已备份: $f"
+}
+
+cmd_restore(){
+  [ $# -ge 1 ] || { echo "用法: koodo-hub restore <file.tar.gz>"; exit 1; }
+  local f="$1"
+  [ -f "$f" ] || { echo "备份文件不存在: $f" >&2; exit 1; }
+  set_dc
+  $DC stop koodo 2>/dev/null || true
+  tar -xzf "$f" -C /
+  $DC start koodo 2>/dev/null || true
+  echo "已从 $f 恢复"
+}
+
+cmd_upgrade(){
+  set_dc
+  if [ "${FREEZE:-0}" = "1" ]; then
+    echo "冻结态：请先 'koodo-hub release' 再升级"; exit 1
+  fi
+  cmd_backup
+  $DC pull koodo
+  $DC up -d koodo
+  echo "升级完成"
+}
+
+cmd_uninstall(){
+  set_dc
+  $DC down
+  read -r -p "是否删除数据目录 ${DATA_PATH:-/srv/koodo/uploads}？[y/N] " a
+  [ "$a" = "y" ] && rm -rf "${DATA_PATH:-/srv/koodo/uploads}" && echo "已删除数据目录"
+}
+
+cmd_freeze(){
+  set_dc
+  need docker
+  local cid
+  cid="$($DC ps -q koodo 2>/dev/null)" || true
+  [ -n "$cid" ] || { echo "koodo 服务未运行，无法获取 digest"; exit 1; }
+  read_env
+  local image_name="${KOODO_IMAGE_TAG:-ghcr.io/koodo-reader/koodo-reader:master}"
+  local digest
+  digest="$(docker image inspect --format='{{index .RepoDigests 0}}' "$image_name" 2>/dev/null)" || true
+  [ -n "$digest" ] || { echo "无法获取 digest，确认镜像已拉取"; exit 1; }
+  local image="${digest%%@*}"
+  printf 'KOODO_IMAGE=%s\nKOODO_DIGEST=%s\nFROZEN_AT=%s\n' \
+    "$image" "$digest" "$(date +%F)" > koodo-image.lock
+  local digest_only="${digest#*@}"
+  set_env KOODO_IMAGE_TAG "${image}@${digest_only}"
+  set_env FREEZE 1
+  $DC up -d koodo
+  echo "已冻结镜像: $digest"
+  echo "建议：git add koodo-image.lock && git commit -m 'chore: freeze vX.Y.Z' && git tag vX.Y.Z"
+}
+
+cmd_release(){
+  set_env FREEZE 0
+  echo "已解冻（尚未升级），可运行 koodo-hub upgrade"
+}
+
+cmd_sync(){
+  local tag="${1:-}"
+  [ -n "$tag" ] || { echo "用法: koodo-hub sync --to <tag>"; exit 1; }
+  git fetch --tags
+  git checkout "$tag"
+  echo "已同步到 $tag（含 koodo-image.lock）"
+}
+
+usage(){
+  echo "用法: koodo-hub {status|backup|restore|upgrade|uninstall|freeze|release|sync}"
+  echo "  sync 需接 --to <tag>"
+}
+
+main(){
+  local c="${1:-}"; shift || true
+  case "$c" in
+    status)   cmd_status ;;
+    backup)   cmd_backup ;;
+    restore)  cmd_restore "$@" ;;
+    upgrade)  cmd_upgrade ;;
+    uninstall) cmd_uninstall ;;
+    freeze)   cmd_freeze ;;
+    release)  cmd_release ;;
+    sync)     cmd_sync "$@" ;;
+    *) usage; exit 1 ;;
+  esac
+}
+main "$@"

@@ -1,0 +1,3 @@
+KOODO_IMAGE=ghcr.io/koodo-reader/koodo-reader
+KOODO_DIGEST=ghcr.io/koodo-reader/koodo-reader@sha256:6db5e92fe24dd200674aefe33b0c3d20409eebfe33c14a2b0418aedc7fc01c7d
+FROZEN_AT=2026-08-30
