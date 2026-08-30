@@ -1,0 +1,46 @@
+<svg viewBox="0 0 680 300" width="100%" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>koodo 自建书库核心框架</title>
+<desc>设备经自家服务器存取图书，服务器定时离线备份；阅读进度与笔记经官方云同步</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<text x="40" y="30" font-family="var(--font-sans)" font-size="15" font-weight="500" fill="var(--color-text-primary)">书到底存在哪：一张图看明白</text>
+
+<g class="c-gray">
+<rect x="50" y="60" width="140" height="56" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="120" y="80" font-family="var(--font-sans)" font-size="14" font-weight="500" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">Koodo 官方云</text>
+<text x="120" y="100" font-family="var(--font-sans)" font-size="12" fill="#5F5E5A" text-anchor="middle" dominant-baseline="central">只存进度和笔记</text>
+</g>
+
+<path d="M120 118L120 186" fill="none" stroke="#888780" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+<text x="132" y="155" font-family="var(--font-sans)" font-size="12" fill="#5F5E5A">可开可关</text>
+
+<g class="c-gray">
+<rect x="50" y="190" width="140" height="70" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="120" y="215" font-family="var(--font-sans)" font-size="14" font-weight="500" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">你的设备</text>
+<text x="120" y="237" font-family="var(--font-sans)" font-size="12" fill="#5F5E5A" text-anchor="middle" dominant-baseline="central">电脑 / 手机 / 平板</text>
+</g>
+
+<g class="c-green">
+<rect x="290" y="190" width="160" height="70" rx="8" fill="#EAF3DE" stroke="#639922" stroke-width="0.5"/>
+<text x="370" y="215" font-family="var(--font-sans)" font-size="14" font-weight="500" fill="#173404" text-anchor="middle" dominant-baseline="central">自家服务器</text>
+<text x="370" y="237" font-family="var(--font-sans)" font-size="12" fill="#3B6D11" text-anchor="middle" dominant-baseline="central">书库 · 8091 数据源</text>
+</g>
+
+<g class="c-gray">
+<rect x="500" y="190" width="140" height="70" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="570" y="215" font-family="var(--font-sans)" font-size="14" font-weight="500" fill="#2C2C2A" text-anchor="middle" dominant-baseline="central">离线备份</text>
+<text x="570" y="237" font-family="var(--font-sans)" font-size="12" fill="#5F5E5A" text-anchor="middle" dominant-baseline="central">移动硬盘 / 别的电脑</text>
+</g>
+
+<path d="M190 225L286 225" fill="none" stroke="#639922" stroke-width="1.5" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<text x="238" y="212" font-family="var(--font-sans)" font-size="12" fill="#3B6D11" text-anchor="middle">图书</text>
+
+<path d="M450 225L496 225" fill="none" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="473" y="212" font-family="var(--font-sans)" font-size="12" fill="#5F5E5A" text-anchor="middle">备份</text>
+
+<text x="40" y="285" font-family="var(--font-sans)" font-size="12" fill="var(--color-text-secondary)">书只存在你自己的服务器和备份里，官方云拿不走，也救不回</text>
+</svg>
