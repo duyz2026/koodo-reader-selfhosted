@@ -138,6 +138,16 @@ koodo-hub status          # 查看冻结态、镜像 digest
    不声称其背书；若自行修改并再分发 Koodo 源码，须遵循 AGPL-3.0 开源。
 8. **安全。** `.env` 含管理员密码，**绝不入库**；管理端口不要无防护暴露公网。
 
+## 路线图（2.0）
+
+v1.0.0 的连接方式是 **Tailscale 虚拟局域网**，已在 Windows 与安卓真机验证通过。
+
+2.0 计划改为 **公网直连 + HTTPS**，让 iPad、Kindle 等无法安装 Tailscale 的设备也能接入，所有设备统一填一个 URL、不依赖任何 VPN。
+
+前期调研已完成（含国内网络环境的特殊约束与备选路径），详见 [`docs/07-阶段二准备纪要（iPad与Kindle接入）.md`](docs/07-阶段二准备纪要（iPad与Kindle接入）.md)。
+
+> 2.0 的改动不会影响 v1.0.0 的行为，将在 v1.0.0 发布后另起分支推进。
+
 ## 合规说明
 
 本仓库自身采用 **MIT**；它只编排 Koodo Reader 官方镜像、不修改其源码。
@@ -151,7 +161,9 @@ Koodo Reader 为 **AGPL-3.0**，署名见 [NOTICE](NOTICE)。
 ├── docker-compose.yml    # 主栈：koodo-reader + caddy
 ├── .env.example          # 配置项示例
 ├── reverse-proxy/        # Caddyfile 模板与生成的配置/证书
-├── docs/                 # 规划文档（需求/开源化/版本冻结）
+├── docs/                 # 规划与调研文档
+│                         #   01 需求 / 02 开源化 / 03 冻结 / 04 部署手册
+│                         #   05 公众号推文 / 06 技术复盘 / 07 阶段二调研（iPad 与 Kindle）
 └── .github/              # CI 与 issue/PR 模板
 ```
 
