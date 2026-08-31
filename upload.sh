@@ -13,9 +13,11 @@ SSH_USER="${SSH_USER:-root}"
 FILES=(
   install.sh koodo-hub upload.sh
   docker-compose.yml docker-compose.http.yml docker-compose.tls.yml
+  # 冻结契约：版本号 + 镜像 digest 锁，必须与代码同态
+  VERSION koodo-image.lock
   .env.example .gitignore
   LICENSE NOTICE README.md CHANGELOG.md CONTRIBUTING.md SECURITY.md CODE_OF_CONDUCT.md
-  reverse-proxy .github
+  docs reverse-proxy .github
 )
 
 echo "[upload] 上传代码到 ${SSH_USER}@${TARGET}:${DEST}"
