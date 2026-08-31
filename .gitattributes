@@ -1,0 +1,7 @@
+# 跨平台换行符规则（Windows 写、Ubuntu 跑）
+# 防止 .sh 脚本在 Windows checkout 时被转成 CRLF，导致 Ubuntu 上 bash 执行失败
+* text=auto
+*.sh text eol=lf
+koodo-hub text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
