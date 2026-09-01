@@ -26,7 +26,7 @@
 | 冻结状态 | 已冻结（`FREEZE=1`） |
 | Koodo 镜像 | `ghcr.io/koodo-reader/koodo-reader@sha256:6db5e92f…`（v1.0.0 锁定） |
 | 生产验证 | Ubuntu LTS + Tailscale，TLS 模式 3，网页版 8090 / 数据源 8091，已通过 |
-| 仓库地址 | 建仓后填入（本作仓库名 `koodo-reader-selfhosted`） |
+| 仓库地址 | https://github.com/duyz2026/koodo-reader-selfhosted |
 
 版本冻结机制见 [`docs/03-版本冻结与同步.md`](docs/03-版本冻结与同步.md)，
 关键步骤图示见 [`docs/images/preview.html`](docs/images/preview.html)。
