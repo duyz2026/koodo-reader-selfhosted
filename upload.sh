@@ -2,7 +2,7 @@
 # koodo-sync-hub 上传脚本
 # 用途：GitHub 建仓前，把本机（开发机）代码推送到服务器
 # 用法：./upload.sh <服务器地址> [目标目录]
-#   例：./upload.sh 100.86.58.36
+#   例：./upload.sh <TAILSCALE_SERVER_IP>
 #   例：./upload.sh ibm-t460-dyz /opt/koodo-sync-hub
 set -euo pipefail
 
